@@ -77,7 +77,7 @@ class ToolMain {
 	private void start() {
 
 		JFileChooser jFileChooser = new JFileChooser();
-		File workDir = new File(jFileChooser.getCurrentDirectory().getAbsolutePath()+"/Elder Scrolls Online/EsoKR");
+		File workDir = new File("C:\\EsoKR");
 
 		jFileChooser.setFileFilter(new FileFilter() {
 			@Override

@@ -21,7 +21,7 @@ public class CSVmerge {
 
     public void MergeCSV (HashSet<CategoryCSV> CategorizedClientCSV, HashMap<String, PO> targetPO, boolean isJapMerge){
         for(CategoryCSV oneCSV : CategorizedClientCSV){
-            System.out.println("Merge oncCSV. name ["+oneCSV.getZanataFileName());
+            //System.out.println("Merge oncCSV. name ["+oneCSV.getZanataFileName());
             HashMap<String, PO> clientPO = oneCSV.getPODataMap();
             boolean oldTag = false;
             if(oneCSV.getType().equals("item") || oneCSV.getType().equals("skill") ) {
@@ -37,31 +37,37 @@ public class CSVmerge {
     }
 
 
-    public void MergePO(HashMap<String, PO> CategorizedClientPO, HashMap<String, PO> FullPO, boolean isJap, boolean setOLDtag){
-        for(String index : CategorizedClientPO.keySet()){
-            PO basePO = CategorizedClientPO.get(index);
-            //System.out.println(index + "] po ["+ basePO);
+    public void MergePO(HashMap<String, PO> CategorizedClientPO, HashMap<String, PO> targetFullPO, boolean isJap, boolean setOLDtag){
+        try {
+            for (String index : CategorizedClientPO.keySet()) {
+                PO basePO = CategorizedClientPO.get(index);
+                //System.out.println(index + "] po ["+ basePO);
 
-            PO targetPO = FullPO.get(index);
-            if(targetPO == null){
-                System.out.println("no index in target:"+index);
-                continue;
-            } else {
-                if(basePO.getSource().equals(targetPO.getSource())) {
-                    basePO.setTarget(targetPO.getTarget());
-                    basePO.setFuzzy(targetPO.isFuzzy());
+                PO targetPO = targetFullPO.get(index);
+                if (targetPO == null) {
+                    System.out.println("no index in target :" + index);
+                    basePO.setStringFileName(basePO.getFileName().toString());
+                    basePO.setNewData(true);
+                    continue;
                 } else {
-                    if(isJap) {
-                        basePO.setTarget(targetPO.getSource());
-                    } else {
-                        System.out.println("source data changed. index :"+index);
-                        basePO.setFuzzy(true);
+                    if (basePO.getSource().equals(targetPO.getSource())) {
                         basePO.setTarget(targetPO.getTarget());
+                        basePO.setFuzzy(targetPO.isFuzzy());
+                    } else {
+                        if (isJap) {
+                            basePO.setTarget(targetPO.getSource());
+                        } else {
+                            System.out.println("source data changed. index :" + index);
+                            basePO.setFuzzy(true);
+                            basePO.setTarget(targetPO.getTarget());
+                        }
                     }
+                    basePO.setStringFileName(targetPO.getStringFileName());
+                    basePO.setNewData(false);
                 }
-                basePO.setStringFileName(targetPO.getStringFileName());
-                basePO.setNewData(false);
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 

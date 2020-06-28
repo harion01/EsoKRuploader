@@ -2,6 +2,7 @@ package kr.bean;
 
 import kr.config.FileNames;
 
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -124,9 +125,13 @@ public class PO implements Comparable<PO> {
 		this.isNewData = true;
 
 		String[] ids = id.split("-");
-		id1 = Integer.parseInt(ids[0]);
-		id2 = Integer.parseInt(ids[1]);
-		id3 = Integer.parseInt(ids[2]);
+		try {
+			id1 = Integer.parseInt(ids[0]);
+			id2 = Integer.parseInt(ids[1]);
+			id3 = Integer.parseInt(ids[2]);
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
 
 		if(target.equals("")) this.target = source;
 		else if(source.equals("")) this.source = target;

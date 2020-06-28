@@ -124,6 +124,13 @@ class LangManager {
 		originCG.GenCategory();
 		HashSet<CategoryCSV> categorizedClientCSVSet = originCG.getCategorizedCSV();
 
+		int cnt = 0;
+		for(CategoryCSV oneCsv: categorizedClientCSVSet){
+			cnt = cnt + oneCsv.getPODataMap().size();
+		}
+		System.out.println("total categorized index count : "+cnt);
+
+
 		HashMap<String, PO> targetCSVMap = parseZanataPO(FileUtils.listFiles(appWorkConfig.getPODirectory(), new String[]{"po"}, false));
 
 		CSVmerge merge = new CSVmerge();
@@ -161,17 +168,24 @@ class LangManager {
 		categorizedClientCSVSet.addAll(splitedSet);
 
 
-		int cnt = 0;
+		int mergedCnt = 0;
 		for(CategoryCSV oneCSV : categorizedClientCSVSet){
 			CustomPOmodify(oneCSV);
 			HashMap<String, PO> mergedPO = oneCSV.getPODataMap();
 			ArrayList<PO> poList = new ArrayList<>(mergedPO.values());
-			cnt = cnt + poList.size();
+			mergedCnt = mergedCnt + poList.size();
 			makePotFile(poList, false, oneCSV.getZanataFileName(), oneCSV.getType(), "src", "ko", "pot");
 			makePotFile(poList, true, oneCSV.getZanataFileName(), oneCSV.getType(), "trs", "ko", "po");
 		}
-		System.out.println("=========== total csv item count ["+cnt+"]===========");
 
+		System.out.println("=========== total client csv item count ["+cnt+"]===========");
+		System.out.println("=========== total zanata merged csv item count ["+mergedCnt+"]===========");
+		if(cnt != mergedCnt){
+			System.out.println("=========== THERE IS MISSING ITEM IN MERGED CSV!!!  ===========");
+			System.out.println("=========== THERE IS MISSING ITEM IN MERGED CSV!!!  ===========");
+			System.out.println("=========== THERE IS MISSING ITEM IN MERGED CSV!!!  ===========");
+			System.out.println("=========== THERE IS MISSING ITEM IN MERGED CSV!!!  ===========");
+		}
 
 		System.out.println("Select Csv file for generate ja-JP locale");
 		targetCSVMap = originCG.GetSelectedCSVMap();
@@ -182,6 +196,7 @@ class LangManager {
 			makePotFile(poList, true, oneCSV.getZanataFileName(), oneCSV.getType(), "trs", "ja", "po");
 		}
 	}
+
 
 
 
@@ -346,8 +361,9 @@ class LangManager {
 			config.setPattern(AppConfig.POPattern);
 			config.setIsFillEmptyTrg(false);
 			targetCSV.putAll(Utils.sourceToMap(config));
-			System.out.println("zanata po parsed ["+file+"] ");
+
 		}
+		System.out.println("zanata po parse done ");
 		return targetCSV;
 	}
 
@@ -437,6 +453,7 @@ class LangManager {
 
 		// to match src and trs item count, we have to fix the number of each file
 		int splitLimit = 0;
+
 		if("item".equals(type)){
 			splitLimit = 5000;
 		} else if ("skill".equals(type)){
@@ -450,11 +467,14 @@ class LangManager {
 		}
 
 
+
+
 		int fileCount = 0;
 		int appendCount = 0;
 
 
 		String splitFile = fileName;
+		//String splitFile = type;
 		StringBuilder sb = new StringBuilder();
 
 		for (PO p : sort) {
@@ -478,11 +498,13 @@ class LangManager {
 				builderMap.put(splitFile, sb);
 			}
 
+
 			if(appendCount > splitLimit) {
 				fileCount++;
 				splitFile = fileName + fileCount;
 				appendCount = 0;
 			}
+
 
 			if (outputTargetData) {
 				sb.append(p.toTranslatedPO());
@@ -498,12 +520,12 @@ class LangManager {
 				if("trs".equals(folder)) {
 					String path = appWorkConfig.getBaseDirectory() + "/" + folder + "/" + type + "/" + language + "/" + entry.getKey() + "." + fileExtension;
 					//String path = appWorkConfig.getBaseDirectory() + "/" + folder +  "/" + language + "/("+type+")" + entry.getKey() + "." + fileExtension;
-					System.out.println("gen file ["+path+"]");
+					//System.out.println("gen file ["+path+"]");
 					FileUtils.writeStringToFile(new File(path), entry.getValue().toString(), AppConfig.CHARSET);
 				}else {
 					String path = appWorkConfig.getBaseDirectory() + "/" + folder + "/" + type + "/" + entry.getKey() + "." + fileExtension;
 					//String path = appWorkConfig.getBaseDirectory() + "/" + folder +"/" + entry.getKey() + "." + fileExtension;
-					System.out.println("gen file ["+path+"]");
+					//System.out.println("gen file ["+path+"]");
 					FileUtils.writeStringToFile(new File(path), entry.getValue().toString(), AppConfig.CHARSET);
 				}
 			}
@@ -654,12 +676,15 @@ class LangManager {
 
 			FileUtils.writeStringToFile(new File(appWorkConfig.getBaseDirectory() + "/" + fileLinkedList.getLast().getName() + ".merged.csv"), sb.toString(), AppConfig.CHARSET);
 
+			/*
 			ProcessBuilder pb = new ProcessBuilder()
 					.directory(appWorkConfig.getBaseDirectory())
 					.command(appWorkConfig.getBaseDirectory() + "/EsoExtractData.exe\" -x " + fileLinkedList.getLast().getName() + ".merged.csv -p")
 					.redirectError(ProcessBuilder.Redirect.INHERIT)
 					.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 			pb.start().waitFor();
+			*/
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
